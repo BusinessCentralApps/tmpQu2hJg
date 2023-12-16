@@ -1,6 +1,6 @@
-﻿name: 'Add existing app or test app'
+﻿name: 'Create a new performance test app'
 
-run-name: "Add existing app or test app in [${{ github.ref_name }}]"
+run-name: "Create a new performance test app in [${{ github.ref_name }}]"
 
 on:
   workflow_dispatch:
@@ -9,9 +9,25 @@ on:
         description: Project name if the repository is setup for multiple projects
         required: false
         default: '.'
-      url:
-        description: Direct Download Url of .app or .zip file
+      name:
+        description: Name
         required: true
+        default: '<YourAppName>.PerformanceTest'
+      publisher:
+        description: Publisher
+        required: true
+      idrange:
+        description: ID range
+        required: true
+        default: '50000..99999'
+      sampleCode:
+        description: Include Sample code?
+        type: boolean
+        default: true
+      sampleSuite:
+        description: Include Sample BCPT Suite?
+        type: boolean
+        default: true
       directCommit:
         description: Direct Commit?
         type: boolean
@@ -34,7 +50,7 @@ env:
   ALGoRepoSettings: ${{ vars.ALGoRepoSettings }}
 
 jobs:
-  AddExistingAppOrTestApp:
+  CreatePerformanceTestApp:
     needs: [ ]
     runs-on: [ windows-latest ]
     steps:
@@ -51,7 +67,7 @@ jobs:
         uses: businesscentralapps/tmp25dIle-Actions/WorkflowInitialize@main
         with:
           shell: powershell
-          eventId: "DO0090"
+          eventId: "DO0102"
 
       - name: Read settings
         uses: businesscentralapps/tmp25dIle-Actions/ReadSettings@main
@@ -67,14 +83,19 @@ jobs:
           getSecrets: 'TokenForPush'
           useGhTokenWorkflowForPush: '${{ github.event.inputs.useGhTokenWorkflow }}'
 
-      - name: Add existing app
-        uses: businesscentralapps/tmp25dIle-Actions/AddExistingApp@main
+      - name: Creating a new test app
+        uses: businesscentralapps/tmp25dIle-Actions/CreateApp@main
         with:
           shell: powershell
           token: ${{ steps.ReadSecrets.outputs.TokenForPush }}
           parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
           project: ${{ github.event.inputs.project }}
-          url: ${{ github.event.inputs.url }}
+          type: 'Performance Test App'
+          name: ${{ github.event.inputs.name }}
+          publisher: ${{ github.event.inputs.publisher }}
+          idrange: ${{ github.event.inputs.idrange }}
+          sampleCode: ${{ github.event.inputs.sampleCode }}
+          sampleSuite: ${{ github.event.inputs.sampleSuite }}
           directCommit: ${{ github.event.inputs.directCommit }}
 
       - name: Finalize the workflow
@@ -82,5 +103,5 @@ jobs:
         uses: businesscentralapps/tmp25dIle-Actions/WorkflowPostProcess@main
         with:
           shell: powershell
-          eventId: "DO0090"
+          eventId: "DO0102"
           telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
